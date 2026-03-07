@@ -1,53 +1,83 @@
 # Label Studio Graph Annotator
 
-A web application that embeds Label Studio Frontend for annotation and displays a live-updating relationship network graph based on annotation results.
+一个自动化的科研文献标注工具，用于标注变量和关系，并实时显示关系网络图。
 
-## Features
+**🆕 新特性：一键启动 + 零配置！**
 
-- **Embedded Label Studio**: Full-featured annotation interface for labeling variables and creating relationships
-- **Live Network Visualization**: Real-time graph updates using vis-network showing variables (nodes) and their relationships (edges)
-- **Relationship Types**: Support for 4 relation types (moderation, direction, correlation, hierarchy)
-- **Variable Naming**: Edit variable names that automatically update in the graph
-- **Edge Table**: View all relationships in a structured table format
-- **API Integration**: Seamless connection to Label Studio backend for task management
+## ✨ Features
 
-## Prerequisites
+- **🚀 一键启动**：自动探测和启动 Label Studio
+- **⚙️ 零配置体验**：只需配置一次，永久保存
+- **📂 自动导入**：上传 CSV 自动创建项目和导入数据
+- **📊 实时可视化**：标注时实时更新关系网络图
+- **🔗 多类型关系**：支持 moderation、direction、correlation、hierarchy（各 3 个级别）
+- **🏷️ 多种标签**：Variable、Sample、Boundary_Condition、Control
+- **👤 用户管理**：每个用户独立项目，数据隔离
 
-1. **Label Studio OSS** running locally:
+## 🚀 快速开始（Quick Start）
+
+### 方式 1：一键启动（推荐）
+
+**Mac / Linux:**
+```bash
+./start-app.sh
+```
+
+**Windows:**
+```
+双击 start-app.bat
+```
+
+脚本会自动：
+- ✅ 检测并启动 Label Studio
+- ✅ 安装依赖（首次运行）
+- ✅ 启动应用并打开浏览器
+
+### 方式 2：手动启动
+
+```bash
+# 终端 1：启动 Label Studio
+pip install label-studio  # 首次安装
+label-studio start
+
+# 终端 2：启动应用
+npm install  # 首次安装
+npm run dev
+```
+
+## 📝 首次配置（只需一次）
+
+浏览器自动打开后：
+1. **用户名**：输入你的姓名（如：张三）
+2. **API Token**：从 Label Studio 获取
+   - 打开 http://localhost:8080
+   - 右上角头像 → Account Settings → Access Token → 复制
+3. **CSV 文件**：选择你的数据文件（必须包含 **AB** 列）
+4. 点击 **"保存并开始使用"**
+
+✅ **应用会自动**：
+- 创建项目（名称：`{你的用户名}'s Annotation Project`）
+- 配置标注规则
+- 导入 CSV 数据
+- 跳转到标注界面
+
+🎉 **之后每次只需运行** `./start-app.sh` **即可直接标注！**
+
+---
+
+## 📋 前置要求（Prerequisites）
+
+1. **Python 3.7+** 和 **Label Studio**:
    ```bash
    pip install label-studio
-   label-studio start
-   ```
-   This will start Label Studio at `http://localhost:8080`
-
-2. **Node.js** (v18 or higher) and npm installed
-
-3. **Label Studio Project** with:
-   - Tasks containing an `AB` field (abstract text)
-   - The labeling configuration provided in this project
-
-## Installation
-
-1. Navigate to the project directory:
-   ```bash
-   cd label-studio-graph-app
    ```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+2. **Node.js** (v18 or higher) 和 npm
 
-3. Create a `.env.local` file (copy from `.env.example`):
-   ```bash
-   cp .env.example .env.local
-   ```
-
-4. Edit `.env.local` with your configuration:
-   ```env
-   VITE_LABEL_STUDIO_URL=http://localhost:8080
-   VITE_LABEL_STUDIO_TOKEN=your_api_token_here
-   VITE_PROJECT_ID=1
+3. **CSV 数据文件**，必须包含 `AB` 列（摘要文本）
+   ```csv
+   AB,Title,Year
+   "This study investigates...","Sample Title",2023
    ```
 
 ### Getting Your API Token
