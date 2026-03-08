@@ -47,7 +47,52 @@ brew install node
 
 ---
 
-### 3. 安装 Label Studio
+### 3. 配置 Python 虚拟环境
+
+**为什么需要虚拟环境？**
+虚拟环境可以为这个项目创建独立的 Python 环境，避免与系统其他项目冲突。
+
+**步骤一：进入项目文件夹**
+```bash
+cd "你的项目文件夹路径"
+# 例如：cd "/Users/foxxis/Documents/scientific retelling/code/human coding/label-studio-graph-app"
+```
+
+**步骤二：创建虚拟环境**
+```bash
+python3 -m venv venv
+```
+执行后会在项目文件夹中创建一个名为 `venv` 的文件夹。
+
+**步骤三：激活虚拟环境**
+
+Mac/Linux：
+```bash
+source venv/bin/activate
+```
+
+Windows：
+```bash
+venv\Scripts\activate
+```
+
+**成功标志：**
+激活成功后，终端提示符前会出现 `(venv)`，例如：
+```
+(venv) your-username@computer:~/project$
+```
+
+**步骤四：验证虚拟环境**
+```bash
+which python3
+# 应该显示：/你的项目路径/venv/bin/python3
+```
+
+---
+
+### 4. 安装 Label Studio（在虚拟环境中）
+
+**确保虚拟环境已激活**（终端前有 `(venv)` 标识），然后执行：
 
 ```bash
 pip3 install label-studio
@@ -58,9 +103,14 @@ pip3 install label-studio
 label-studio --version
 ```
 
+**注意：**
+- ✅ 每次使用项目前都需要先激活虚拟环境
+- ✅ 关闭终端后，下次需要重新激活
+- ✅ 退出虚拟环境使用命令：`deactivate`
+
 ---
 
-### 4. 安装项目依赖
+### 5. 安装项目依赖
 
 **打开终端，进入项目文件夹：**
 ```bash
@@ -74,7 +124,11 @@ npm install
 
 ---
 
-### 5. 启动项目
+### 6. 启动项目
+
+**重要提醒：**
+- ⚠️ 启动前必须先激活虚拟环境（参考第3步）
+- 终端前应该显示 `(venv)` 标识
 
 **一键启动（推荐）：**
 ```bash
@@ -84,8 +138,9 @@ npm install
 如果提示权限不足，使用手动启动：
 **或者手动启动（打开两个终端）：**
 
-终端 1：
+终端 1（需要在虚拟环境中）：
 ```bash
+source venv/bin/activate  # 先激活虚拟环境
 label-studio start
 ```
 
@@ -100,7 +155,7 @@ npm run dev
 
 ---
 
-### 6. 配置 Token 和 CSV
+### 7. 配置 Token 和 CSV
 
 #### 6.1 获取 JWT Token
 
@@ -135,7 +190,7 @@ npm run dev
 
 ## 🔄 日常使用（第二次及以后）
 
-配置完成后，以后每次使用只需 3 步：
+配置完成后，以后每次使用只需 4 步：
 
 ### 1. 打开终端
 ```bash
@@ -148,12 +203,24 @@ npm run dev
 cd "你的项目文件夹路径"
 ```
 
-### 3. 启动应用
+### 3. 激活虚拟环境
+```bash
+# Mac/Linux:
+source venv/bin/activate
+
+# Windows:
+venv\Scripts\activate
+```
+**确认成功：** 终端前出现 `(venv)` 标识
+
+### 4. 启动应用
 ```bash
 ./start-app.sh
 ```
 
 ✅ 完成！浏览器自动打开，继续标注。
+
+**💡 提示：** 使用完毕后，可以用 `deactivate` 命令退出虚拟环境。
 
 ---
 
@@ -251,9 +318,36 @@ taskkill /PID <进程ID> /F
 
 **解决**：
 ```bash
+# 确保已激活虚拟环境
+source venv/bin/activate
+
+# 在虚拟环境中安装
 pip3 install label-studio
 # 或
 python3 -m pip install label-studio
+```
+
+---
+
+### 3.5 忘记激活虚拟环境
+
+**问题**：提示 "label-studio: command not found"，但之前已经安装过
+
+**原因**：可能是关闭终端后忘记重新激活虚拟环境
+
+**解决**：
+```bash
+# 进入项目文件夹
+cd "你的项目文件夹路径"
+
+# 激活虚拟环境
+source venv/bin/activate  # Mac/Linux
+# 或
+venv\Scripts\activate     # Windows
+
+# 确认激活成功（终端前应显示 (venv)）
+# 然后再启动应用
+label-studio start
 ```
 
 ---
