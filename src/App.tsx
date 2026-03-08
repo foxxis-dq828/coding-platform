@@ -4,6 +4,7 @@ import { GraphPanel } from './components/GraphPanel';
 import { LabelStudioAPI } from './utils/api';
 import { ResultParser } from './utils/parser';
 import { Task, AnnotationResult, ParsedData, LabelStudioConfig } from './types';
+import Papa from 'papaparse';
 import './App.css';
 
 const DEFAULT_CONFIG = `
@@ -199,41 +200,56 @@ function App() {
     }
   };
 
-  // 解析 CSV 文件
+  // 解析 CSV 文件 (使用 Papa Parse)
   const parseCSV = async (file: File): Promise<any[]> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const text = e.target?.result as string;
-          const lines = text.split('\n').filter(line => line.trim());
-
-          // 假设第一行是表头
-          const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-
-          // 找到 AB 列的索引
-          const abIndex = headers.findIndex(h => h === 'AB');
-          if (abIndex === -1) {
-            reject(new Error('CSV 文件中未找到 AB 列'));
-            return;
-          }
-
-          // 解析数据行
-          const tasks = [];
-          for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-            if (values[abIndex] && values[abIndex].length > 0) {
-              tasks.push({ AB: values[abIndex] });
+      Papa.parse<Record<string, any>>(file, {
+        header: true,           // 自动识别表头
+        skipEmptyLines: true,   // 跳过空行
+        dynamicTyping: false,   // 保持字符串类型
+        transformHeader: (header) => header.trim(), // 去除表头空格
+        complete: (results) => {
+          try {
+            // 检查是否有数据
+            if (!results.data || results.data.length === 0) {
+              reject(new Error('CSV 文件为空或格式不正确'));
+              return;
             }
-          }
 
-          resolve(tasks);
-        } catch (err) {
-          reject(err);
+            // 检查是否有 AB 列
+            const firstRow = results.data[0] as any;
+            if (!('AB' in firstRow)) {
+              const availableColumns = Object.keys(firstRow).join(', ');
+              reject(new Error(
+                `CSV 文件中未找到 AB 列\n` +
+                `可用的列：${availableColumns}\n` +
+                `请确保 CSV 文件包含名为 "AB" 的列`
+              ));
+              return;
+            }
+
+            // 提取 AB 列的数据
+            const tasks = (results.data as any[])
+              .filter(row => row.AB && String(row.AB).trim().length > 0)
+              .map(row => ({ AB: String(row.AB).trim() }));
+
+            if (tasks.length === 0) {
+              reject(new Error('CSV 文件中没有有效的 AB 数据（AB 列为空）'));
+              return;
+            }
+
+            console.log(`✅ 成功解析 ${tasks.length} 条任务（共 ${results.data.length} 行数据）`);
+            resolve(tasks);
+          } catch (err) {
+            console.error('CSV 解析错误:', err);
+            reject(err);
+          }
+        },
+        error: (error) => {
+          console.error('Papa Parse 错误:', error);
+          reject(new Error(`CSV 解析失败: ${error.message}`));
         }
-      };
-      reader.onerror = () => reject(new Error('文件读取失败'));
-      reader.readAsText(file);
+      });
     });
   };
 
@@ -440,7 +456,7 @@ function App() {
     handleTaskChange(taskId);
   }, [taskIdInput, handleTaskChange]);
 
-  const handleTaskIdKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleTaskIdKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleGoToTask();
     }
@@ -580,7 +596,7 @@ function App() {
               type="number"
               value={taskIdInput}
               onChange={(e) => setTaskIdInput(e.target.value)}
-              onKeyPress={handleTaskIdKeyPress}
+              onKeyDown={handleTaskIdKeyDown}
               placeholder="Task ID"
               style={{
                 width: '80px',
