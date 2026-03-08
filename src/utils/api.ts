@@ -231,4 +231,9 @@ export class LabelStudioAPI {
     await this.ensureInitialized();
     return this.request('/projects/');
   }
+
+  // 获取当前配置（包括更新后的 access token）
+  getConfig(): LabelStudioConfig {
+    return { ...this.config };
+  }
 }

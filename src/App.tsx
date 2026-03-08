@@ -241,13 +241,19 @@ function App() {
     e.preventDefault();
     setUploading(true);
     const formData = new FormData(e.currentTarget);
-    const token = formData.get('token') as string;
     const refreshToken = formData.get('refreshToken') as string;
     const username = formData.get('username') as string;
 
     // 验证
-    if (!token && !refreshToken) {
-      alert('请提供 API Token');
+    if (!refreshToken) {
+      alert('请提供 JWT Activation Token (Refresh Token)');
+      setUploading(false);
+      return;
+    }
+
+    // 验证 token 格式（JWT refresh token 应该以 eyJ 开头）
+    if (!refreshToken.startsWith('eyJ')) {
+      alert('Token 格式不正确！\nJWT Refresh Token 应该以 "eyJ" 开头。\n请确认你复制的是正确的 JWT token。');
       setUploading(false);
       return;
     }
@@ -265,16 +271,21 @@ function App() {
     }
 
     try {
-      // 创建临时 API 实例
+      // 创建临时 API 实例（只使用 refreshToken，token 留空，让 API 自动获取）
       const tempConfig: LabelStudioConfig = {
         url: formData.get('url') as string,
-        token: token,
+        token: '', // 留空，让 API 类自动通过 refreshToken 获取
         refreshToken: refreshToken,
         projectId: 0, // 暂时设为 0
         username: username,
       };
 
+      console.log('[App] Creating API instance with refresh token...');
       const tempApi = new LabelStudioAPI(tempConfig);
+
+      // 等待 API 初始化（会自动调用 /api/token/refresh/ 获取 access token）
+      console.log('[App] Waiting for API initialization (token refresh)...');
+      // API 构造函数会自动触发 token refresh
 
       // 1. 创建新项目
       console.log('Creating project...');
@@ -295,15 +306,24 @@ function App() {
       await tempApi.importTasks(project.id, tasks);
       console.log('Tasks imported successfully');
 
-      // 3. 保存配置
+      // 3. 保存配置（获取包含 access token 的最新配置）
+      const updatedConfig = tempApi.getConfig();
       const newConfig: LabelStudioConfig = {
-        ...tempConfig,
+        ...updatedConfig,
         projectId: project.id,
+        username: username,
       };
+
+      console.log('[App] Saving config with access token:', {
+        hasAccessToken: !!newConfig.token,
+        hasRefreshToken: !!newConfig.refreshToken,
+        projectId: newConfig.projectId,
+      });
+
       setConfig(newConfig);
       saveConfig(newConfig);
 
-      alert(`设置完成！\n- 项目 ID: ${project.id}\n- 导入任务数: ${tasks.length}`);
+      alert(`设置完成！\n- 项目 ID: ${project.id}\n- 导入任务数: ${tasks.length}\n\n✅ Access token 已自动获取并保存`);
     } catch (err) {
       console.error('Setup failed:', err);
       alert('设置失败: ' + (err instanceof Error ? err.message : 'Unknown error'));
@@ -474,19 +494,20 @@ function App() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="token">API Token:</label>
+              <label htmlFor="refreshToken">JWT Activation Token (Refresh Token):</label>
               <input
                 type="text"
-                id="token"
-                name="token"
-                placeholder="粘贴你的 API token"
+                id="refreshToken"
+                name="refreshToken"
+                placeholder="粘贴你的 JWT activation token（以 eyJ 开头）"
                 required
               />
               <small>
                 <strong>如何获取 Token：</strong><br/>
                 1. 打开 <a href="http://localhost:8080" target="_blank" rel="noopener noreferrer">Label Studio</a><br/>
                 2. 点击右上角头像 → Account Settings<br/>
-                3. 点击 "Access Token" 标签 → 复制 token
+                3. 点击 "Access Token" 标签 → 复制 JWT token<br/>
+                4. Token 应该以 <code>eyJ</code> 开头（这是正确的 JWT refresh token）
               </small>
             </div>
 
