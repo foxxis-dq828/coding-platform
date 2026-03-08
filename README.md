@@ -55,7 +55,7 @@ brew install node
 **步骤一：进入项目文件夹**
 ```bash
 cd "你的项目文件夹路径"
-# 例如：cd "/Users/foxxis/Documents/scientific retelling/code/human coding/label-studio-graph-app"
+# 例如：cd "/..../coding-platform-main"
 ```
 
 **步骤二：创建虚拟环境**

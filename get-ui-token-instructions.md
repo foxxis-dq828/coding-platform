@@ -12,8 +12,8 @@ Personal Access Tokens are meant for API access and must be generated from the L
    ```
 
 2. **Login with your credentials:**
-   - Email: danqin.zhao@warwick.ac.uk
-   - Password: Zdq@0212161111
+   - Email: xxx@xxxx
+   - Password: xxxxxxx
 
 3. **Navigate to Account Settings:**
    - Click on your profile/avatar in the top-right corner
