@@ -56,6 +56,7 @@ export interface GraphNode {
   id: string;
   label: string;
   rawText: string;
+  type?: string; // Variable, Sample, Boundary_Condition, Control
 }
 
 export interface GraphEdge {
@@ -63,6 +64,7 @@ export interface GraphEdge {
   to: string;
   label: string;
   direction: string;
+  type?: string; // Full relation type like "moderation__validated"
 }
 
 export interface LabelStudioConfig {

@@ -10,7 +10,7 @@ import './App.css';
 const DEFAULT_CONFIG = `
 <View style="display:flex; gap:16px;">
   <View style="flex: 1;">
-    <Relations name="rel" choice="single">
+    <Relations name="rel" choice="multiple">
       <!-- moderation -->
       <Relation value="moderation__validated"    background="#ffd54f"/>
       <Relation value="moderation__hypothesized" background="#ffe082"/>

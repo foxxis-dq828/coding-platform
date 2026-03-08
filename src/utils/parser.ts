@@ -11,7 +11,7 @@ import {
 export class ResultParser {
   parse(results: AnnotationResult[]): ParsedData {
     // Build maps
-    const spansMap = new Map<string, { text: string }>();
+    const spansMap = new Map<string, { text: string; type: string }>();
     const namesMap = new Map<string, string>();
     const edges: GraphEdge[] = [];
 
@@ -19,7 +19,9 @@ export class ResultParser {
     for (const result of results) {
       if (result.type === 'labels' && result.from_name === 'var_label') {
         const span = result as SpanResult;
-        spansMap.set(span.id, { text: span.value.text });
+        // Save the label type (Variable, Sample, Boundary_Condition, Control)
+        const labelType = span.value.labels?.[0] || 'Variable';
+        spansMap.set(span.id, { text: span.value.text, type: labelType });
       } else if (result.type === 'textarea' && result.from_name === 'var_name') {
         const textarea = result as TextAreaResult;
         const name = textarea.value.text?.[0];
@@ -28,11 +30,15 @@ export class ResultParser {
         }
       } else if (result.type === 'relation') {
         const relation = result as RelationResult;
+        const fullType = relation.labels?.[0] || 'relation';
+        // Extract base type for display label (e.g., "moderation__validated" -> "moderation")
+        const displayLabel = fullType.split('__')[0];
         edges.push({
           from: relation.from_id,
           to: relation.to_id,
-          label: relation.labels?.[0] || 'relation',
+          label: displayLabel,
           direction: relation.direction,
+          type: fullType, // Keep full type for coloring
         });
       }
     }
@@ -45,6 +51,7 @@ export class ResultParser {
         id,
         label,
         rawText: span.text,
+        type: span.type, // Add node type
       });
     }
 
